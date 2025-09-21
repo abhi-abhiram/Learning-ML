@@ -77,6 +77,11 @@ class Value:
         v = Value(self.value + other.value)
         v.op = Add(self,other)
         return v
+
+    def __radd__(self,other):
+        v = Value(self.value + other)
+        v.op = Add(self,Value(other))
+        return v
     
     def __sub__(self,other):
         v = Value(self.value - other.value)
@@ -88,9 +93,19 @@ class Value:
         v.op = Multiply(self,other)
         return v
 
+    def  __rmul__(self,other):
+        v = Value(self.value * other)
+        v.op = Multiply(self,Value(other))
+        return v
+
     def __truediv__(self,other):
         v = Value(self.value * other.value)
         v.op = Divide(self,other)
+        return v
+
+    def tanh(self):
+        v = Value(math.tanh(self.value))
+        v.op = Tanh(self)
         return v
 
     def __str__(self):
@@ -105,27 +120,60 @@ class Value:
 
 
 class Perceptron: 
-    weights = np.random.random(4)
-    def __init__(self,inputs):
-        self.output = self.activation(inputs @ self.weights)
+    output = None
+    def __init__(self,sw):
+        self.weights = [Value(0) for _ in range(sw)]  
 
-    def activation(self,input):
-        return math.tanh(input)
+
+    def __call__(self,inputs):
+        sigmaResult = self.sum([i * w for i,w in zip(inputs,self.weights)])
+        v = sigmaResult.tanh()
+        self.output = v
+        return v
+
+    def sum(self,inputs):
+        total = Value(0)
+        for input in inputs:
+            total += input
+        return total
+
+
+
+class Layer:
+    perceptrons = []
+
+    def __init__(self,sp,sw):
+        self.perceptrons = [Perceptron(sw) for _ in range(sp)] 
+
+    def __call__(self,inputs):
+        outputs = []
+        for p in self.perceptrons:
+            outputs.append(p(inputs))
+        return outputs
+
+
         
-    
 
+class MultiLayer:
+    def __init__(self, numOfInputs, size):
+        total_size = [numOfInputs] + size
+        self.layers = [Layer(total_size[i + 1],total_size[i]) for i in range(len(size))]
 
-# input = np.random.random(4)
+    def run(self,inputs):
+       temp = inputs
+       for layer in self.layers:
+        layer * temp
+        temp = layer
+       return temp
 
-# p = Perceptron(input)
+    def __call__(self, inputs):
+        for layer in self.layers:
+            inputs = layer(inputs)
+        return inputs
+        
+        
+inputs = [1,2,3]
 
-# a = Value(10)
-# b = Value(20)
+network = MultiLayer(3,[4,4,1])
 
-# c = a + b
-
-# d = a * c
-
-# e = d - c
-
-# print(e)
+print(network(inputs))
