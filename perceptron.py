@@ -176,4 +176,8 @@ inputs = [1,2,3]
 
 network = MultiLayer(3,[4,4,1])
 
-print(network(inputs))
+outputs = network(inputs)
+
+
+for i in outputs:
+    print(i)
