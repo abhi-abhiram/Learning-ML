@@ -6,6 +6,23 @@ class Operator:
     def __init__(self,op):
         self.op = op
 
+
+class Tanh(Operator):
+    def __init__(self,input):
+        super().__init__("Tanh")
+        self.input = input
+
+
+    def __str__(self):
+        input = None
+        if self.input.op != None:
+            input = self.input.op
+        else:
+            input = self.input
+
+
+        return f"(tanh({input}))"
+
 class BinaryOp(Operator):
     def __init__(self, op,left,right):
         super().__init__(op)
